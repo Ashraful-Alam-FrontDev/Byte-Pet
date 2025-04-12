@@ -140,44 +140,51 @@ app.put('/api/pets/:id/sleep', (req, res) => {
 });
 
 // Socket.io for real-time updates
-io.on('connection', (socket) => {
-  console.log('New client connected');
+  io.on('connection', (socket) => {
+    console.log('New client connected');
 
-  // Emit stats decay every minute
-  const interval = setInterval(() => {
-    pets.forEach(pet => {
-      const timeSinceLastInteraction = (new Date() - new Date(pet.lastInteracted)) / 1000 / 60; // minutes
+    // Emit stats decay every 5 seconds
+    const interval = setInterval(() => {
+      pets.forEach(pet => {
+        // Calculate time since last interaction in seconds
+        const timeSinceLastInteraction = (new Date() - new Date(pet.lastInteracted)) / 1000;
 
-      // Decay stats based on time
-      if (timeSinceLastInteraction > 1) {
-        pet.stats.hunger = Math.max(0, pet.stats.hunger - 1);
-        // Happiness decreases when hunger is low
-        if (pet.stats.hunger < 40) {
-          pet.stats.happiness = Math.max(0, pet.stats.happiness - 2);
+        // Happiness decay starts after 15 seconds of inactivity
+        if (timeSinceLastInteraction > 15) {
+          pet.stats.happiness = Math.max(0, pet.stats.happiness - 1);
         }
-        pet.stats.hygiene = Math.max(0, pet.stats.hygiene - 1);
-      }
 
-      // Natural energy regeneration during "night" time
-      const hour = new Date().getHours();
-      if (hour >= 22 || hour <= 6) {
-        pet.stats.energy = Math.min(100, pet.stats.energy + 2);
-      } else {
-        pet.stats.energy = Math.max(0, pet.stats.energy - 0.5);
-      }
+        // Hunger decay starts after 30 seconds of inactivity
+        if (timeSinceLastInteraction > 30) {
+          pet.stats.hunger = Math.max(0, pet.stats.hunger - 1);
+        }
 
-      // Update mood based on new stats
-      updatePetMood(pet);
+        // Hygiene decay is slower
+        if (timeSinceLastInteraction > 60) {
+          pet.stats.hygiene = Math.max(0, pet.stats.hygiene - 0.5);
+        }
 
-      socket.emit('petUpdate', pet);
+        // Natural energy regeneration during "night" time
+        const hour = new Date().getHours();
+        if (hour >= 22 || hour <= 6) {
+          pet.stats.energy = Math.min(100, pet.stats.energy + 0.5);
+        } else if (timeSinceLastInteraction > 45) {
+          // Energy decreases after 45 seconds of inactivity
+          pet.stats.energy = Math.max(0, pet.stats.energy - 0.5);
+        }
+
+        // Update mood based on new stats
+        updatePetMood(pet);
+
+        socket.emit('petUpdate', pet);
+      });
+    }, 5000); // Check every 5 seconds
+
+    socket.on('disconnect', () => {
+      clearInterval(interval);
+      console.log('Client disconnected');
     });
-  }, 60000); // every minute
-
-  socket.on('disconnect', () => {
-    clearInterval(interval);
-    console.log('Client disconnected');
   });
-});
 
 // Helper function to update pet mood based on stats
 function updatePetMood(pet) {
