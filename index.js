@@ -150,17 +150,16 @@ io.on("connection", (socket) => {
       const timeSinceLastInteraction =
         (new Date() - new Date(pet.lastInteracted)) / 1000;
 
-      // Happiness decay starts after 15 seconds of inactivity
+      // Each stat decays independently based on its own timer
       if (timeSinceLastInteraction > 15) {
         pet.stats.happiness = Math.max(0, pet.stats.happiness - 1);
       }
-
-      // Hunger decay starts after 30 seconds of inactivity
+      
       if (timeSinceLastInteraction > 30) {
         pet.stats.hunger = Math.max(0, pet.stats.hunger - 1);
+        // Happiness is not affected here anymore
       }
 
-      // Hygiene decay is slower
       if (timeSinceLastInteraction > 60) {
         pet.stats.hygiene = Math.max(0, pet.stats.hygiene - 0.5);
       }
