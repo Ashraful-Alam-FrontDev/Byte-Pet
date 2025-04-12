@@ -84,7 +84,7 @@ app.put('/api/pets/:id/play', (req, res) => {
   pet.stats.happiness = Math.min(100, pet.stats.happiness + 20);
   pet.stats.energy = Math.max(0, pet.stats.energy - 15);
   pet.stats.hunger = Math.max(0, pet.stats.hunger - 5);
-  pet.stats.hygiene = Math.max(0, pet.stats.hygiene - 10); // Decrease hygiene when playing
+  pet.stats.hygiene = Math.max(0, pet.stats.hygiene - 15); // Decrease hygiene more when playing
 
   // Update mood
   updatePetMood(pet);
@@ -145,9 +145,10 @@ io.on('connection', (socket) => {
       // Decay stats based on time
       if (timeSinceLastInteraction > 1) {
         pet.stats.hunger = Math.max(0, pet.stats.hunger - 1);
-        // Happiness decreases faster when hungry
-        const happinessDecay = pet.stats.hunger < 30 ? 2 : 1;
-        pet.stats.happiness = Math.max(0, pet.stats.happiness - happinessDecay);
+        // Happiness decreases when hunger is low
+        if (pet.stats.hunger < 40) {
+          pet.stats.happiness = Math.max(0, pet.stats.happiness - 2);
+        }
         pet.stats.hygiene = Math.max(0, pet.stats.hygiene - 1);
       }
 
