@@ -151,13 +151,17 @@ io.on("connection", (socket) => {
         (new Date() - new Date(pet.lastInteracted)) / 1000;
 
       // Each stat decays independently based on its own timer
-      if (timeSinceLastInteraction > 15) {
-        pet.stats.happiness = Math.max(0, pet.stats.happiness - 1);
-      }
-      
       if (timeSinceLastInteraction > 30) {
         pet.stats.hunger = Math.max(0, pet.stats.hunger - 1);
-        // Happiness is not affected here anymore
+        // Decrease happiness if hunger is low
+        if (pet.stats.hunger < 50) {
+          pet.stats.happiness = Math.max(0, pet.stats.happiness - 2);
+        }
+      }
+      
+      // Regular happiness decay
+      if (timeSinceLastInteraction > 15) {
+        pet.stats.happiness = Math.max(0, pet.stats.happiness - 1);
       }
 
       if (timeSinceLastInteraction > 60) {
