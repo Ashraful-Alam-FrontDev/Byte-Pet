@@ -1,13 +1,11 @@
 const express = require('express');
-const path = require('path');
+const { pathToRegexp } = require('path-to-regexp');
 const app = express();
 
-// Serve static files from the public directory
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Serve index.html for all routes to support client-side routing
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// Example route definition
+app.get('/user/:id', (req, res) => {
+  const userId = req.params.id;
+  res.send(`User ID: ${userId}`);
 });
 
 // Starting the server
