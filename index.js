@@ -123,8 +123,14 @@ app.put('/api/pets/:id/sleep', (req, res) => {
   // Significantly increase energy
   pet.stats.energy = Math.min(100, pet.stats.energy + 50);
 
-  // Slightly decrease hunger while sleeping
-  pet.stats.hunger = Math.max(0, pet.stats.hunger - 5);
+  // Decrease hunger while sleeping
+  const hungerDecrease = 5;
+  pet.stats.hunger = Math.max(0, pet.stats.hunger - hungerDecrease);
+  
+  // Decrease happiness if hunger gets too low from sleeping
+  if (pet.stats.hunger < 40) {
+    pet.stats.happiness = Math.max(0, pet.stats.happiness - 10);
+  }
 
   // Update mood to reflect the refreshed state
   updatePetMood(pet);
