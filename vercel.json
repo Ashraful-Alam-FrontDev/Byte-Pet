@@ -33,11 +33,5 @@
       "src": "/(.*)",
       "dest": "index.js"
     }
-  ],
-  "rewrites": [
-    {
-      "source": "/socket.io",
-      "destination": "index.js"
-    }
   ]
 }
